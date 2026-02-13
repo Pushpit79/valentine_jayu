@@ -93,26 +93,62 @@
 
   <script>
     const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
     const container = document.querySelector('.buttons');
 
     function moveNoButton(x, y) {
       const rect = noBtn.getBoundingClientRect();
+      const yesRect = yesBtn.getBoundingClientRect();
+
       const distance = Math.hypot(
         x - (rect.left + rect.width / 2),
         y - (rect.top + rect.height / 2)
       );
 
-      const threshold = 120;
+      const threshold = 130; // more sensitive
+      const moveMultiplier = 2.1; // increases jump distance
 
       if (distance < threshold) {
         const maxX = container.clientWidth - rect.width;
         const maxY = container.clientHeight - rect.height;
 
-        const newX = Math.random() * maxX;
-        const newY = Math.random() * maxY;
+        // Move away from cursor direction
+        const offsetX = (rect.left - x) * 0.25 * moveMultiplier;
+        const offsetY = (rect.top - y) * 0.25 * moveMultiplier;
 
-        noBtn.style.left = newX + "px";
-        noBtn.style.top = newY + "px";
+        let newX = noBtn.offsetLeft + offsetX;
+        let newY = noBtn.offsetTop + offsetY;
+
+        // Keep inside container
+        if (newX < 0) newX = 0;
+        if (newY < 0) newY = 0;
+        if (newX > maxX) newX = maxX;
+        if (newY > maxY) newY = maxY;
+
+        // Prevent overlap with YES button
+        const futureRect = {
+          left: container.offsetLeft + newX,
+          right: container.offsetLeft + newX + rect.width,
+          top: container.offsetTop + newY,
+          bottom: container.offsetTop + newY + rect.height
+        };
+
+        const overlap =
+          !(futureRect.right < yesRect.left ||
+            futureRect.left > yesRect.right ||
+            futureRect.bottom < yesRect.top ||
+            futureRect.top > yesRect.bottom);
+
+        if (!overlap) {
+          noBtn.style.left = newX + "px";
+          noBtn.style.top = newY + "px";
+        } else {
+          // If overlap would happen, move to a random safe spot
+          const safeX = Math.random() * maxX;
+          const safeY = Math.random() * maxY;
+          noBtn.style.left = safeX + "px";
+          noBtn.style.top = safeY + "px";
+        }
       }
     }
 
@@ -133,7 +169,7 @@
     });
 
     // Yes button action
-    document.getElementById('yesBtn').onclick = () => {
+    yesBtn.onclick = () => {
       alert("Yay! ❤️ You made my day!");
     };
 
