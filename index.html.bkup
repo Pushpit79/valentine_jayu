@@ -84,12 +84,6 @@
 </head>
 
 <body>
-
-  <!-- Background Music -->
-  <audio autoplay loop>
-    <source src="ishq.mp3" type="audio/mpeg">
-  </audio>
-
   <h1>❤️ Will you be my valentine?</h1>
 
   <div class="buttons">
@@ -111,24 +105,27 @@
         y - (rect.top + rect.height / 2)
       );
 
-      const threshold = 130;
-      const moveMultiplier = 2.0; // increased jump distance
+      const threshold = 130; // more sensitive
+      const moveMultiplier = 2.1; // increases jump distance
 
       if (distance < threshold) {
         const maxX = container.clientWidth - rect.width;
         const maxY = container.clientHeight - rect.height;
 
+        // Move away from cursor direction
         const offsetX = (rect.left - x) * 0.25 * moveMultiplier;
         const offsetY = (rect.top - y) * 0.25 * moveMultiplier;
 
         let newX = noBtn.offsetLeft + offsetX;
         let newY = noBtn.offsetTop + offsetY;
 
+        // Keep inside container
         if (newX < 0) newX = 0;
         if (newY < 0) newY = 0;
         if (newX > maxX) newX = maxX;
         if (newY > maxY) newY = maxY;
 
+        // Prevent overlap with YES button
         const futureRect = {
           left: container.offsetLeft + newX,
           right: container.offsetLeft + newX + rect.width,
@@ -146,6 +143,7 @@
           noBtn.style.left = newX + "px";
           noBtn.style.top = newY + "px";
         } else {
+          // If overlap would happen, move to a random safe spot
           const safeX = Math.random() * maxX;
           const safeY = Math.random() * maxY;
           noBtn.style.left = safeX + "px";
@@ -154,10 +152,12 @@
       }
     }
 
+    // Mouse
     document.addEventListener('mousemove', (e) => {
       moveNoButton(e.clientX, e.clientY);
     });
 
+    // Touch
     document.addEventListener('touchmove', (e) => {
       const t = e.touches[0];
       moveNoButton(t.clientX, t.clientY);
@@ -168,10 +168,12 @@
       moveNoButton(t.clientX, t.clientY);
     });
 
+    // Yes button action
     yesBtn.onclick = () => {
       alert("Yay! ❤️ You made my day!");
     };
 
+    // Floating hearts generator
     function createHeart() {
       const heart = document.createElement("div");
       heart.classList.add("heart");
